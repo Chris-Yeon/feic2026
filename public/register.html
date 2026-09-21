@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — FEIC 2026 International Conference</title>
+
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Paystack Inline Popup JS -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+
+  <style>
+    :root {
+      --navy: #1B2A4A;
+      --navy-dark: #111C33;
+      --navy-mid: #243358;
+      --gold: #F5A623;
+      --gold-light: #FFB940;
+      --orange: #E87722;
+      --white: #FFFFFF;
+      --offwhite: #F4F6FA;
+      --gray: #8A94A6;
+      --text-light: #D0D8E8;
+      --radius: 12px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.12);
+      --transition: 0.3s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--offwhite); color: var(--navy); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Top Bar */
+    .topbar { background: var(--navy-dark); color: var(--text-light); padding: 10px 24px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); }
+    .topbar a { color: var(--gold); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .topbar a:hover { color: var(--gold-light); }
+
+    /* Container */
+    .container { max-width: 680px; width: 100%; margin: 40px auto; padding: 0 20px; flex: 1; }
+
+    /* Card */
+    .card { background: var(--white); border-radius: var(--radius); padding: 40px 36px; box-shadow: var(--shadow); border-top: 5px solid var(--gold); }
+    .card h1 { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--navy); text-transform: uppercase; margin-bottom: 6px; }
+    .card h1 span { color: var(--gold); }
+    .subtitle { color: var(--gray); font-size: 0.95rem; margin-bottom: 28px; }
+
+    /* Tier Selector */
+    .tier-label { font-size: 0.85rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; display: block; }
+    .tiers { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
+    @media (min-width: 540px) {
+      .tiers { grid-template-columns: 1fr 1fr; }
+    }
+    .tier-option { border: 2px solid #E2E8F0; border-radius: 8px; padding: 14px; cursor: pointer; transition: var(--transition); position: relative; }
+    .tier-option:hover { border-color: var(--gold-light); }
+    .tier-option.active { border-color: var(--gold); background: rgba(245,166,35,0.06); }
+    .tier-name { font-weight: 700; font-size: 0.9rem; color: var(--navy); }
+    .tier-price { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: var(--orange); margin-top: 4px; }
+    .tier-badge { position: absolute; top: -10px; right: 12px; background: var(--gold); color: var(--navy-dark); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+    .form-group label span { color: #E53E3E; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px 14px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: var(--navy); transition: var(--transition); background: #FAFCFE;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: var(--gold); background: var(--white); box-shadow: 0 0 0 3px rgba(245,166,35,0.2);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%; background: linear-gradient(135deg, var(--gold), var(--orange)); color: var(--white); font-weight: 700; font-size: 1rem; border: none; padding: 15px; border-radius: 8px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 24px;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,119,34,0.35); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Security Note */
+    .security-note { text-align: center; font-size: 0.78rem; color: var(--gray); margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .security-note i { color: #16A34A; }
+
+    /* Status Banner */
+    .banner { padding: 14px 18px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; display: none; }
+    .banner.error { background: #FEE2E2; color: #991B1B; border-left: 4px solid #DC2626; }
+    .banner.success { background: #DCFCE7; color: #166534; border-left: 4px solid #16A34A; }
+
+    /* Footer */
+    footer { background: var(--navy-dark); color: var(--text-light); text-align: center; padding: 20px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    footer a { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span><i class="fas fa-university"></i> Faculty of Engineering, University of Lagos</span>
+    <a href="/"><i class="fas fa-arrow-left"></i> Back to Main Site</a>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h1>Conference <span>Registration</span></h1>
+      <p class="subtitle">Complete the form below to register and pay for FEIC 2026. Securely verified via Paystack &amp; recorded in Supabase.</p>
+
+      <div id="statusBanner" class="banner"></div>
+
+      <form id="standaloneRegForm" onsubmit="handleRegistration(event)">
+        
+        <!-- Registration Tier Selection -->
+        <label class="tier-label">Select Registration Category <span style="color:#E53E3E;">*</span></label>
+        <div class="tiers">
+          <div class="tier-option active" onclick="selectTier(this, 'National Student (NGN)', 30000, 'NGN', 'student-ngn')">
+            <div class="tier-name"><i class="fas fa-user-graduate"></i> National Student</div>
+            <div class="tier-price">&#8358;30,000</div>
+          </div>
+          <div class="tier-option" onclick="selectTier(this, 'National Non-Student (NGN)', 70000, 'NGN', 'non-student-ngn')">
+            <span class="tier-badge">Popular</span>
+            <div class="tier-name"><i class="fas fa-user-tie"></i> National Non-Student</div>
+            <div class="tier-price">&#8358;70,000</div>
+          </div>
+          <div class="tier-option" style="grid-column: 1 / -1;" onclick="selectTier(this, 'International Delegate (USD)', 200, 'USD', 'international-usd')">
+            <div class="tier-name"><i class="fas fa-globe"></i> International Delegate</div>
+            <div class="tier-price">$200 USD</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-name">Full Name <span>*</span></label>
+          <input type="text" id="reg-name" placeholder="Prof. / Dr. / Engr. / Mr. / Ms." required />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email Address <span>*</span></label>
+          <input type="email" id="reg-email" placeholder="you@university.edu" required />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-phone">Phone Number (WhatsApp preferred)</label>
+          <input type="tel" id="reg-phone" placeholder="+234 800 000 0000" />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-affil">Institution / University / Company <span>*</span></label>
+          <input type="text" id="reg-affil" placeholder="University of Lagos" required />
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-submit">
+          <i class="fas fa-lock"></i> Register &amp; Pay Now
+        </button>
+      </form>
+
+      <div class="security-note">
+        <i class="fas fa-shield-alt"></i> 256-bit SSL encrypted Paystack paywall &bull; Official registration record preserved in Supabase
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Faculty of Engineering, University of Lagos (UNILAG). All rights reserved. &bull; <a href="/">Return to FEIC 2026</a>
+  </footer>
+
+  <script>
+    let selectedTier = {
+      category: 'National Student (NGN)',
+      amount: 30000,
+      currency: 'NGN',
+      type: 'student-ngn'
+    };
+
+    function selectTier(el, category, amount, currency, type) {
+      document.querySelectorAll('.tier-option').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      selectedTier = { category, amount, currency, type };
+    }
+
+    function showBanner(msg, type) {
+      const banner = document.getElementById('statusBanner');
+      banner.textContent = msg;
+      banner.className = 'banner ' + type;
+      banner.style.display = 'block';
+    }
+
+    async function handleRegistration(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const affiliation = document.getElementById('reg-affil').value.trim();
+
+      if (!name || !email || !affiliation) {
+        showBanner('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Registration...';
+
+        // 1. Register registrant in backend Supabase
+        const regRes = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            affiliation,
+            category: selectedTier.category
+          })
+        });
+
+        const regData = await regRes.json();
+        if (!regRes.ok || !regData.success) {
+          throw new Error(regData.message || 'Failed to complete registration.');
+        }
+
+        const registrationId = regData.registration.id;
+
+        // 2. Initialize Paystack Transaction via backend
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Payment Gateway...';
+        const payRes = await fetch('/api/paystack/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            registration_id: registrationId,
+            email: email,
+            amount: selectedTier.amount,
+            currency: selectedTier.currency
+          })
+        });
+
+        const payInitData = await payRes.json();
+        if (!payRes.ok || !payInitData.success) {
+          throw new Error(payInitData.message || 'Failed to initialize Paystack paywall.');
+        }
+
+        // 3. Fetch public key from backend or use Paystack Inline
+        const configRes = await fetch('/api/config');
+        const configData = await configRes.json();
+        const publicKey = configData.paystackPublicKey;
+
+        // Option A: If inline setup is desired and public key is available
+        if (publicKey && typeof PaystackPop !== 'undefined' && payInitData.access_code) {
+          submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Paystack Popup Active...';
+          
+          PaystackPop.setup({
+            key: publicKey,
+            email: email,
+            amount: selectedTier.amount * 100,
+            currency: selectedTier.currency,
+            ref: payInitData.reference,
+            callback: function(response) {
+              showBanner('Payment initiated! Waiting for backend webhook confirmation...', 'success');
+              submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Awaiting Webhook Confirmation...';
+              
+              // Poll registration status until verified webhook updates status to 'paid'
+              let attempts = 0;
+              const pollInterval = setInterval(async () => {
+                attempts++;
+                try {
+                  const check = await fetch('/api/registration-status/' + registrationId);
+                  const checkData = await check.json();
+                  if (checkData.success && checkData.registration.status === 'paid') {
+                    clearInterval(pollInterval);
+                    showBanner(`Registration & Payment Confirmed! Welcome, ${name}. Reference: ${response.reference}`, 'success');
+                    submitBtn.innerHTML = '<i class="fas fa-check-double"></i> Payment Verified by Webhook!';
+                  }
+                } catch(err) {}
+                if (attempts >= 10) {
+                  clearInterval(pollInterval);
+                  showBanner(`Payment submitted! Your reference is ${response.reference}. You will receive an official confirmation receipt shortly.`, 'success');
+                }
+              }, 2000);
+            },
+            onClose: function() {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-lock"></i> Register &amp; Pay Now';
+            }
+          }).openIframe();
+
+        } else if (payInitData.authorization_url) {
+          // Option B: Redirect to Paystack Checkout URL
+          window.location.href = payInitData.authorization_url;
+        } else {
+          throw new Error('No authorization URL or popup access code returned.');
+        }
+
+      } catch (err) {
+        console.error(err);
+        showBanner(err.message || 'An error occurred during registration.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-lock"></i> Register &amp; Pay Now';
+      }
+    }
+  </script>
+</body>
+</html>
