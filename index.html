@@ -799,33 +799,64 @@
         <div class="category" id="modal-category">Category</div>
         <div class="price" id="modal-price">Amount</div>
       </div>
-      <div style="text-align:right;">
-        <div style="font-size:0.65rem;color:var(--gray);margin-bottom:4px;">Secured by</div>
-        <div style="font-weight:800;color:#00c3f7;font-size:1rem;">Paystack</div>
-      </div>
     </div>
-    <form id="payForm" onsubmit="initiatePayment(event)">
-      <div class="form-group">
-        <label for="pay-name">Full Name <span style="color:red;">*</span></label>
-        <input type="text" id="pay-name" placeholder="e.g. Adebayo Okafor" required />
+
+    <!-- Remita notice -->
+    <div style="background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.35);border-radius:10px;padding:14px 18px;margin-bottom:22px;font-size:0.85rem;line-height:1.6;color:var(--navy);">
+      <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px;"></i>
+      Fill in your details and we will calculate your fee. You will then be given the exact figures to enter on the university's <strong>Remita portal</strong>. Payment via any other route cannot be reconciled against the conference account.
+    </div>
+
+    <form id="payForm" onsubmit="submitRegistration(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="pay-name">Full Name <span style="color:red;">*</span></label>
+          <input type="text" id="pay-name" placeholder="As it should appear on your certificate" required />
+          <small style="color:var(--gray);font-size:0.72rem;">As it should appear on your certificate, and on the Remita payment slip.</small>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="pay-email">Email Address <span style="color:red;">*</span></label>
+          <input type="email" id="pay-email" placeholder="you@example.com" required />
+          <small style="color:var(--gray);font-size:0.72rem;">Your reference and payment steps are sent here.</small>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="pay-phone">Phone Number</label>
+          <input type="tel" id="pay-phone" placeholder="+234 ..." />
+          <small style="color:var(--gray);font-size:0.72rem;">Include your country code if outside Nigeria, e.g. +44 or +1.</small>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="pay-affil">Institution or Organisation <span style="color:red;">*</span></label>
+          <input type="text" id="pay-affil" placeholder="e.g. University of Lagos" required />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="pay-email">Email Address <span style="color:red;">*</span></label>
-        <input type="email" id="pay-email" placeholder="e.g. you@example.com" required />
+      <div class="form-group" style="margin-top:18px;">
+        <label for="pay-category">Category <span style="color:red;">*</span></label>
+        <select id="pay-category" required onchange="updateFeeDisplay()" style="width:100%;padding:12px 14px;border-radius:8px;border:1.5px solid #D0D8E8;font-size:0.95rem;font-family:inherit;background:var(--offwhite);color:var(--navy);outline:none;">
+          <option value="" disabled selected>— Select your category —</option>
+          <option value="Early Academic (NGN)" data-fee="₦60,000">Early-bird Academic (Nigerian) — ₦60,000</option>
+          <option value="Academic (NGN)" data-fee="₦75,000">Standard Academic (Nigerian) — ₦75,000</option>
+          <option value="Student (NGN)" data-fee="₦30,000">Student (Nigerian) — ₦30,000</option>
+          <option value="Academic (USD)" data-fee="USD 400">International Academic — USD 400</option>
+          <option value="Student (USD)" data-fee="USD 200">International Student — USD 200</option>
+          <option value="Industry (NGN)" data-fee="₦100,000">Industry / Corporate (Nigerian) — ₦100,000</option>
+          <option value="Industry (USD)" data-fee="USD 500">International Industry / Corporate — USD 500</option>
+          <option value="Virtual (NGN)" data-fee="₦20,000">Virtual Attendance (Nigerian) — ₦20,000</option>
+          <option value="Virtual (USD)" data-fee="USD 100">Virtual Attendance (International) — USD 100</option>
+        </select>
       </div>
-      <div class="form-group">
-        <label for="pay-phone">Phone Number</label>
-        <input type="tel" id="pay-phone" placeholder="e.g. +2348012345678" />
+
+      <!-- Fee summary shown after category selection -->
+      <div id="fee-summary" style="display:none;background:linear-gradient(135deg,#1B2A4A,#243358);color:#fff;border-radius:12px;padding:20px 24px;margin:18px 0;display:none;">
+        <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:4px;">Amount due for your category</div>
+        <div id="fee-amount" style="font-size:2rem;font-weight:800;color:var(--gold);"></div>
+        <div style="font-size:0.75rem;color:var(--text-light);margin-top:8px;"><i class="fas fa-university"></i> Pay this amount on the University of Lagos <strong>Remita portal</strong> after submitting this form.</div>
       </div>
-      <div class="form-group">
-        <label for="pay-affil">Institution / Organisation <span style="color:red;">*</span></label>
-        <input type="text" id="pay-affil" placeholder="e.g. University of Lagos" required />
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:16px;">
-        <i class="fas fa-lock"></i> Proceed to Secure Payment
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:16px;margin-top:8px;">
+        <i class="fas fa-paper-plane"></i> Submit Registration &amp; Get Payment Instructions
       </button>
     </form>
-    <div class="paystack-logo"><i class="fas fa-shield-alt"></i> 256-bit SSL encrypted payment via Paystack</div>
+    <div class="paystack-logo"><i class="fas fa-university"></i> Payment processed securely via the University of Lagos Remita portal</div>
   </div>
 </div>
 
@@ -964,6 +995,7 @@
           <a href="#" class="social-icon" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
           <a href="#" class="social-icon" title="Facebook"><i class="fab fa-facebook-f"></i></a>
           <a href="#" class="social-icon" title="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="https://www.instagram.com/p/Dd9gPFGou-O/?stkn=ZjFkYzMzMDQzZg==" target="_blank" rel="noopener" class="social-icon" title="Instagram"><i class="fab fa-instagram"></i></a>
         </div>
         <div style="margin-top:22px;">
           <h5 style="margin-bottom:10px;">Stay Updated</h5>
@@ -1021,13 +1053,19 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---- PAYMENT ---- */
+/* ---- PAYMENT / REGISTRATION FORM ---- */
 let payData = {};
 
 function openPayModal(type, category, currency, amount, displayAmount) {
-  payData = { type, category, currency, amount };
+  payData = { type, category, currency, amount, displayAmount };
   document.getElementById('modal-category').textContent = category;
   document.getElementById('modal-price').textContent    = displayAmount;
+  // Pre-select the matching category in the dropdown if possible
+  const sel = document.getElementById('pay-category');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === category) { sel.selectedIndex = i; break; }
+  }
+  updateFeeDisplay();
   document.getElementById('payModal').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -1035,118 +1073,76 @@ function closePayModal() {
   document.getElementById('payModal').classList.remove('active');
   document.body.style.overflow = '';
   document.getElementById('payForm').reset();
+  document.getElementById('fee-summary').style.display = 'none';
 }
 document.getElementById('payModal').addEventListener('click', e => { if (e.target.id === 'payModal') closePayModal(); });
 
-async function initiatePayment(e) {
-  e.preventDefault();
-  const name  = document.getElementById('pay-name').value.trim();
-  const email = document.getElementById('pay-email').value.trim();
-  const phone = document.getElementById('pay-phone').value.trim();
-  const affil = document.getElementById('pay-affil').value.trim();
-  if (!name || !email || !affil) { alert('Please fill in all required fields.'); return; }
-
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  const originalBtnText = submitBtn.innerHTML;
-
-  try {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering in Database...';
-
-    // 1. Record registration in Supabase via backend API
-    const regRes = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        affiliation: affil,
-        category: payData.category
-      })
-    });
-
-    const regData = await regRes.json();
-    if (!regRes.ok || !regData.success) {
-      throw new Error(regData.message || 'Registration failed. Please try again.');
-    }
-
-    const registrationId = regData.registration.id;
-
-    // 2. Initialize Paystack Transaction via backend API
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Paystack...';
-    const initRes = await fetch('/api/paystack/init', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        registration_id: registrationId,
-        email: email,
-        amount: payData.amount,
-        currency: payData.currency
-      })
-    });
-
-    const initData = await initRes.json();
-    if (!initRes.ok || !initData.success) {
-      throw new Error(initData.message || 'Payment initialization failed.');
-    }
-
-    // 3. Get Public Key from backend config endpoint
-    let publicKey = '';
-    try {
-      const cfgRes = await fetch('/api/config');
-      const cfg = await cfgRes.json();
-      publicKey = cfg.paystackPublicKey;
-    } catch(err) {}
-
-    // Option A: Use Paystack Inline Popup if public key and PaystackPop exist
-    if (publicKey && typeof PaystackPop !== 'undefined') {
-      PaystackPop.setup({
-        key: publicKey,
-        email: email,
-        amount: payData.amount * 100,
-        currency: payData.currency,
-        ref: initData.reference,
-        callback: function(res) {
-          closePayModal();
-          const msg = document.createElement('div');
-          msg.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:#16a34a;color:#fff;padding:20px 24px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.3);max-width:360px;font-family:Inter,sans-serif;line-height:1.5;';
-          msg.innerHTML = '<strong style="display:block;margin-bottom:6px;font-size:1rem;"><i class="fas fa-check-circle"></i> Payment Submitted!</strong><span style="font-size:0.85rem;">Thank you, ' + name + '!<br>Reference: <strong>' + res.reference + '</strong><br>Awaiting secure server webhook verification...</span>';
-          document.body.appendChild(msg);
-
-          // Poll registration status to confirm webhook verified payment in Supabase
-          let attempts = 0;
-          const poll = setInterval(async () => {
-            attempts++;
-            try {
-              const statusRes = await fetch('/api/registration-status/' + registrationId);
-              const statusData = await statusRes.json();
-              if (statusData.success && statusData.registration.status === 'paid') {
-                clearInterval(poll);
-                msg.innerHTML = '<strong style="display:block;margin-bottom:6px;font-size:1rem;"><i class="fas fa-check-double"></i> Payment Confirmed!</strong><span style="font-size:0.85rem;">Your registration has been marked as <strong>PAID</strong> in the database.<br>Official receipt will be sent to ' + email + '.</span>';
-              }
-            } catch(e) {}
-            if (attempts >= 10) clearInterval(poll);
-          }, 2000);
-
-          setTimeout(() => { if (msg.parentNode) msg.remove(); }, 12000);
-        },
-        onClose: function() {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-        }
-      }).openIframe();
-    } else if (initData.authorization_url) {
-      // Option B: Redirect to Paystack Checkout URL
-      window.location.href = initData.authorization_url;
-    } else {
-      throw new Error('Unable to start payment gateway.');
-    }
-  } catch (err) {
-    alert(err.message || 'An error occurred during registration.');
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnText;
+function updateFeeDisplay() {
+  const sel = document.getElementById('pay-category');
+  const opt = sel.options[sel.selectedIndex];
+  const summary = document.getElementById('fee-summary');
+  if (opt && opt.dataset.fee) {
+    document.getElementById('fee-amount').textContent = opt.dataset.fee;
+    summary.style.display = 'block';
+    document.getElementById('modal-category').textContent = opt.value;
+    document.getElementById('modal-price').textContent    = opt.dataset.fee;
+  } else {
+    summary.style.display = 'none';
   }
+}
+
+function submitRegistration(e) {
+  e.preventDefault();
+  const name     = document.getElementById('pay-name').value.trim();
+  const email    = document.getElementById('pay-email').value.trim();
+  const phone    = document.getElementById('pay-phone').value.trim();
+  const affil    = document.getElementById('pay-affil').value.trim();
+  const sel      = document.getElementById('pay-category');
+  const catLabel = sel.options[sel.selectedIndex];
+  if (!name || !email || !affil || !catLabel || !catLabel.dataset.fee) {
+    alert('Please fill in all required fields and select a category.');
+    return;
+  }
+  const fee      = catLabel.dataset.fee;
+  const category = catLabel.value;
+
+  // Close form and show payment instructions
+  closePayModal();
+  const msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:rgba(17,28,51,0.88);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
+  msg.innerHTML = `
+    <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;padding:36px 32px;font-family:Inter,sans-serif;position:relative;">
+      <button onclick="this.closest('[style]').remove()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#8A94A6;">&#x2715;</button>
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="width:56px;height:56px;background:linear-gradient(135deg,#F5A623,#E87722);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+          <i class="fas fa-check" style="color:#fff;font-size:1.5rem;"></i>
+        </div>
+        <h3 style="color:#1B2A4A;font-size:1.3rem;margin-bottom:6px;">Registration Received!</h3>
+        <p style="color:#8A94A6;font-size:0.9rem;">Thank you, <strong>${name}</strong>. Please complete your payment below.</p>
+      </div>
+      <div style="background:#F4F6FA;border-radius:10px;padding:20px;margin-bottom:22px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85rem;">
+          <div><span style="color:#8A94A6;">Name</span><br><strong>${name}</strong></div>
+          <div><span style="color:#8A94A6;">Email</span><br><strong>${email}</strong></div>
+          <div><span style="color:#8A94A6;">Category</span><br><strong>${category}</strong></div>
+          <div><span style="color:#8A94A6;">Amount Due</span><br><strong style="color:#E87722;font-size:1.05rem;">${fee}</strong></div>
+        </div>
+      </div>
+      <div style="background:#1B2A4A;color:#fff;border-radius:10px;padding:18px 20px;font-size:0.85rem;line-height:1.7;margin-bottom:22px;">
+        <strong style="display:block;margin-bottom:8px;color:#F5A623;"><i class="fas fa-university"></i> Payment Instructions (Remita)</strong>
+        <ol style="margin:0;padding-left:18px;">
+          <li>Visit <a href="https://remita.net" target="_blank" style="color:#F5A623;">remita.net</a> and select <em>"Pay Federal Government of Nigeria"</em>.</li>
+          <li>Search for <strong>University of Lagos</strong> as the biller.</li>
+          <li>Select the <strong>FEIC 2026 Conference Fee</strong> service.</li>
+          <li>Enter your name, email (<strong>${email}</strong>) and the amount: <strong>${fee}</strong>.</li>
+          <li>Complete payment and keep your Remita Retrieval Reference (RRR).</li>
+          <li>Email your RRR to <a href="mailto:feiconference@unilag.edu.ng" style="color:#F5A623;">feiconference@unilag.edu.ng</a> to confirm your registration.</li>
+        </ol>
+      </div>
+      <button onclick="this.closest('[style]').remove()" style="width:100%;padding:14px;background:linear-gradient(135deg,#F5A623,#E87722);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;">Close</button>
+    </div>
+  `;
+  document.body.appendChild(msg);
 }
 
 
