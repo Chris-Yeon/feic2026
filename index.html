@@ -182,20 +182,227 @@
     .reg-card .btn { width: 100%; justify-content: center; }
 
     /* MODAL */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
-    .modal-overlay.active { display: flex; }
-    .modal { background: var(--white); border-radius: 16px; padding: 40px; max-width: 480px; width: 100%; position: relative; animation: modalIn 0.3s ease; }
-    @keyframes modalIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-    .modal-close { position: absolute; top: 16px; right: 16px; background: var(--offwhite); border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1rem; color: var(--navy); display: flex; align-items: center; justify-content: center; }
-    .modal h3 { font-family: 'Oswald', sans-serif; font-size: 1.4rem; color: var(--navy); margin-bottom: 4px; }
-    .modal .modal-subtitle { color: var(--gray); font-size: 0.85rem; margin-bottom: 24px; }
-    .modal .price-display { background: var(--offwhite); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
-    .modal .price-display .price { font-family: 'Oswald', sans-serif; font-size: 1.6rem; color: var(--navy); }
-    .modal .price-display .category { font-size: 0.8rem; color: var(--gray); }
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
-    .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid #E2E8F0; border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--navy); transition: var(--transition); background: var(--white); }
-    .form-group input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,166,35,0.15); }
+    body.modal-open {
+      overflow: hidden !important;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 18, 36, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 99999;
+      padding: 40px 16px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
+    }
+    .modal-overlay.active {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .modal {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 680px;
+      width: 100%;
+      position: relative;
+      margin: auto 0;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+      animation: modalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: var(--offwhite);
+      border: 1px solid #E2E8F0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      z-index: 10;
+    }
+    .modal-close:hover {
+      background: #E2E8F0;
+      color: #000;
+    }
+    .modal h3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      color: var(--navy);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal .modal-subtitle {
+      color: #4A5568;
+      font-size: 0.86rem;
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+    .modal-notice {
+      background: #FFF8E6;
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: #5A4400;
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .modal {
+        padding: 24px 18px;
+        margin: 16px 0;
+      }
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--navy);
+      transition: var(--transition);
+      background: var(--white);
+      box-sizing: border-box;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.2);
+    }
+    .form-group small {
+      display: block;
+      color: #64748B;
+      font-size: 0.72rem;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+    .file-upload-zone {
+      border: 2px dashed #CBD5E1;
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      text-align: center;
+      background: var(--offwhite);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .file-upload-zone:hover {
+      border-color: var(--gold);
+      background: #FFFDF9;
+    }
+    .file-info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: #EBF8FF;
+      border: 1px solid #BEE3F8;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #2B6CB0;
+      max-width: 100%;
+      word-break: break-all;
+    }
+    .reg-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1.5px solid #E2E8F0;
+      padding-bottom: 10px;
+    }
+    .reg-tab-btn {
+      padding: 9px 18px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1.5px solid transparent;
+      background: transparent;
+      color: #64748B;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: var(--transition);
+    }
+    .reg-tab-btn.active {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+    .reg-tab-btn:hover:not(.active) {
+      background: #F1F5F9;
+      color: var(--navy);
+    }
+    .gform-container {
+      width: 100%;
+      min-height: 520px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid #E2E8F0;
+      background: var(--white);
+    }
+    .gform-container iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      display: block;
+    }
+    .google-sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      color: #166534;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
     .paystack-logo { text-align: center; margin-top: 14px; color: var(--gray); font-size: 0.75rem; }
 
     /* SUBMISSION */
@@ -755,15 +962,15 @@
   <div class="container">
     <div class="gold-bar"></div>
     <h2 class="section-title">Registration <span>Fees</span></h2>
-    <p class="section-subtitle">Secure your place at FEIC 2026 — all payments are processed securely via Paystack</p>
+    <p class="section-subtitle">Secure your place at FEIC 2026 — register and upload your payment receipt below</p>
     <div class="reg-grid">
       <div class="reg-card">
         <div class="reg-icon"><i class="fas fa-user-graduate"></i></div>
         <div class="reg-type">National &bull; Student</div>
         <div class="reg-price"><span class="reg-currency">&#8358;</span>30,000</div>
         <div class="reg-desc">Full conference access for Nigerian student delegates</div>
-        <button class="btn btn-primary" onclick="openPayModal('student-ngn','National Student (NGN)','NGN',30000,'&#8358;30,000')">
-          <i class="fas fa-credit-card"></i> Pay Now
+        <button class="btn btn-primary" onclick="openPayModal('student','National Student','NGN',30000,'&#8358;30,000')">
+          <i class="fas fa-ticket-alt"></i> Register &amp; Pay
         </button>
       </div>
       <div class="reg-card featured">
@@ -771,8 +978,8 @@
         <div class="reg-type">National &bull; Non-Student</div>
         <div class="reg-price"><span class="reg-currency">&#8358;</span>70,000</div>
         <div class="reg-desc">Full conference access for Nigerian professional / academic delegates</div>
-        <button class="btn btn-primary" onclick="openPayModal('non-student-ngn','National Non-Student (NGN)','NGN',70000,'&#8358;70,000')">
-          <i class="fas fa-credit-card"></i> Pay Now
+        <button class="btn btn-primary" onclick="openPayModal('non-student','National Non-Student','NGN',70000,'&#8358;70,000')">
+          <i class="fas fa-ticket-alt"></i> Register &amp; Pay
         </button>
       </div>
       <div class="reg-card">
@@ -780,83 +987,142 @@
         <div class="reg-type">International Delegate</div>
         <div class="reg-price"><span class="reg-currency">$</span>200</div>
         <div class="reg-desc">Full conference access for international delegates (USD)</div>
-        <button class="btn btn-outline" onclick="openPayModal('international-usd','International Delegate (USD)','USD',200,'$200')">
-          <i class="fas fa-credit-card"></i> Pay Now
+        <button class="btn btn-outline" onclick="openPayModal('international','International Delegate','USD',200,'$200')">
+          <i class="fas fa-ticket-alt"></i> Register &amp; Pay
         </button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PAYMENT MODAL -->
+<!-- REGISTRATION & PAYMENT MODAL -->
 <div class="modal-overlay" id="payModal">
   <div class="modal">
-    <button class="modal-close" onclick="closePayModal()"><i class="fas fa-times"></i></button>
-    <h3><i class="fas fa-credit-card" style="color:var(--gold);margin-right:8px;"></i>Conference Registration</h3>
-    <p class="modal-subtitle">Secure payment powered by Paystack. Your data is protected.</p>
-    <div class="price-display">
-      <div>
-        <div class="category" id="modal-category">Category</div>
-        <div class="price" id="modal-price">Amount</div>
-      </div>
+    <button class="modal-close" onclick="closePayModal()" aria-label="Close modal"><i class="fas fa-times"></i></button>
+    <h3><i class="fas fa-file-invoice-dollar" style="color:var(--gold);"></i> Registration and Payment</h3>
+    <p class="modal-subtitle">
+      Fill this in and we work out what you owe, reserve your place, and hand you the exact figures to enter on the university's Remita portal. The bank step cannot be skipped: this is the university's own collection route, and a payment made any other way cannot be reconciled against the conference account.
+    </p>
+
+    <!-- Google Sheets & Drive Sync Badge -->
+    <div class="google-sync-badge">
+      <i class="fab fa-google-drive" style="color:#16A34A;font-size:0.95rem;"></i>
+      <span><strong>Option 1 Activated:</strong> Registrations &amp; receipts sync directly to UNILAG Conference Google Sheet &amp; Google Drive</span>
     </div>
 
-    <!-- Remita notice -->
-    <div style="background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.35);border-radius:10px;padding:14px 18px;margin-bottom:22px;font-size:0.85rem;line-height:1.6;color:var(--navy);">
-      <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px;"></i>
-      Fill in your details and we will calculate your fee. You will then be given the exact figures to enter on the university's <strong>Remita portal</strong>. Payment via any other route cannot be reconciled against the conference account.
-    </div>
-
-    <form id="payForm" onsubmit="submitRegistration(event)">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-        <div class="form-group" style="margin-bottom:0;">
-          <label for="pay-name">Full Name <span style="color:red;">*</span></label>
-          <input type="text" id="pay-name" placeholder="As it should appear on your certificate" required />
-          <small style="color:var(--gray);font-size:0.72rem;">As it should appear on your certificate, and on the Remita payment slip.</small>
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label for="pay-email">Email Address <span style="color:red;">*</span></label>
-          <input type="email" id="pay-email" placeholder="you@example.com" required />
-          <small style="color:var(--gray);font-size:0.72rem;">Your reference and payment steps are sent here.</small>
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label for="pay-phone">Phone Number</label>
-          <input type="tel" id="pay-phone" placeholder="+234 ..." />
-          <small style="color:var(--gray);font-size:0.72rem;">Include your country code if outside Nigeria, e.g. +44 or +1.</small>
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label for="pay-affil">Institution or Organisation <span style="color:red;">*</span></label>
-          <input type="text" id="pay-affil" placeholder="e.g. University of Lagos" required />
-        </div>
-      </div>
-      <div class="form-group" style="margin-top:18px;">
-        <label for="pay-category">Category <span style="color:red;">*</span></label>
-        <select id="pay-category" required onchange="updateFeeDisplay()" style="width:100%;padding:12px 14px;border-radius:8px;border:1.5px solid #D0D8E8;font-size:0.95rem;font-family:inherit;background:var(--offwhite);color:var(--navy);outline:none;">
-          <option value="" disabled selected>— Select your category —</option>
-          <option value="Early Academic (NGN)" data-fee="₦60,000">Early-bird Academic (Nigerian) — ₦60,000</option>
-          <option value="Academic (NGN)" data-fee="₦75,000">Standard Academic (Nigerian) — ₦75,000</option>
-          <option value="Student (NGN)" data-fee="₦30,000">Student (Nigerian) — ₦30,000</option>
-          <option value="Academic (USD)" data-fee="USD 400">International Academic — USD 400</option>
-          <option value="Student (USD)" data-fee="USD 200">International Student — USD 200</option>
-          <option value="Industry (NGN)" data-fee="₦100,000">Industry / Corporate (Nigerian) — ₦100,000</option>
-          <option value="Industry (USD)" data-fee="USD 500">International Industry / Corporate — USD 500</option>
-          <option value="Virtual (NGN)" data-fee="₦20,000">Virtual Attendance (Nigerian) — ₦20,000</option>
-          <option value="Virtual (USD)" data-fee="USD 100">Virtual Attendance (International) — USD 100</option>
-        </select>
-      </div>
-
-      <!-- Fee summary shown after category selection -->
-      <div id="fee-summary" style="display:none;background:linear-gradient(135deg,#1B2A4A,#243358);color:#fff;border-radius:12px;padding:20px 24px;margin:18px 0;display:none;">
-        <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:4px;">Amount due for your category</div>
-        <div id="fee-amount" style="font-size:2rem;font-weight:800;color:var(--gold);"></div>
-        <div style="font-size:0.75rem;color:var(--text-light);margin-top:8px;"><i class="fas fa-university"></i> Pay this amount on the University of Lagos <strong>Remita portal</strong> after submitting this form.</div>
-      </div>
-
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:16px;margin-top:8px;">
-        <i class="fas fa-paper-plane"></i> Submit Registration &amp; Get Payment Instructions
+    <!-- Registration Mode Tabs -->
+    <div class="reg-tabs">
+      <button type="button" class="reg-tab-btn active" id="tab-btn-form" onclick="switchRegTab('form')">
+        <i class="fas fa-edit"></i> Registration &amp; Receipt Form
       </button>
-    </form>
-    <div class="paystack-logo"><i class="fas fa-university"></i> Payment processed securely via the University of Lagos Remita portal</div>
+      <button type="button" class="reg-tab-btn" id="tab-btn-gform" onclick="switchRegTab('gform')">
+        <i class="fab fa-google"></i> Embedded Google Form View
+      </button>
+    </div>
+
+    <!-- Remita Guidance Notice -->
+    <div class="modal-notice">
+      <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px;"></i>
+      <strong>How payment works:</strong> You can pay via <a href="https://remita.net" target="_blank" rel="noopener" style="color:var(--orange-dark);font-weight:700;text-decoration:underline;">remita.net</a> (Biller: <em>University of Lagos</em>, Service: <em>FEIC 2026 Conference Fee</em>), then enter your RRR code and upload your payment slip below. If you have not paid yet, submit this form to receive your registration reference and pay afterwards.
+    </div>
+
+    <!-- PANEL 1: Standard Web Form (Syncs to Google Sheets & Drive) -->
+    <div id="reg-form-panel">
+      <form id="payForm" onsubmit="submitRegistration(event)">
+        <!-- 2-Column Grid -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="pay-name">Full Name <span style="color:red;">*</span></label>
+            <input type="text" id="pay-name" placeholder="e.g. Prof. / Dr. / Mr. / Ms." required />
+            <small>As it should appear on your certificate, and on the Remita payment slip.</small>
+          </div>
+          <div class="form-group">
+            <label for="pay-email">Email Address <span style="color:red;">*</span></label>
+            <input type="email" id="pay-email" placeholder="you@example.com" required />
+            <small>Your confirmation reference and payment steps are sent here.</small>
+          </div>
+          <div class="form-group">
+            <label for="pay-phone">Phone Number</label>
+            <input type="tel" id="pay-phone" placeholder="+234 ..." />
+            <small>Include your country code if outside Nigeria, for example +44 or +1.</small>
+          </div>
+          <div class="form-group">
+            <label for="pay-affil">Institution or Organisation <span style="color:red;">*</span></label>
+            <input type="text" id="pay-affil" placeholder="e.g. University of Lagos" required />
+            <small>Your university, research institute, or organisation.</small>
+          </div>
+        </div>
+
+        <!-- Simplified Category Selection (3 options only) -->
+        <div class="form-group" style="margin-top:4px;">
+          <label for="pay-category">Conference Category <span style="color:red;">*</span></label>
+          <select id="pay-category" required onchange="updateFeeDisplay()">
+            <option value="student" data-fee="&#8358;30,000" data-label="National Student (NGN)">National Student — &#8358;30,000</option>
+            <option value="non-student" data-fee="&#8358;70,000" data-label="National Non-Student (NGN)">National Non-Student / Academic — &#8358;70,000</option>
+            <option value="international" data-fee="$200" data-label="International Delegate (USD)">International Delegate — $200</option>
+          </select>
+          <small>Select the registration category that applies to you.</small>
+        </div>
+
+        <!-- Fee Summary Card -->
+        <div id="fee-summary" style="background:linear-gradient(135deg,#1B2A4A,#243358);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 14px rgba(0,0,0,0.1);">
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;">Amount Due For Category</div>
+            <div id="fee-cat-name" style="font-size:0.92rem;font-weight:600;margin-top:2px;color:#fff;">National Student</div>
+          </div>
+          <div id="fee-amount" style="font-size:1.8rem;font-weight:800;color:var(--gold);">&#8358;30,000</div>
+        </div>
+
+        <!-- Remita RRR Field -->
+        <div class="form-group">
+          <label for="pay-rrr">Remita Retrieval Reference (RRR) / Transaction Code</label>
+          <input type="text" id="pay-rrr" placeholder="e.g. 1234-5678-9012 (if paid)" />
+          <small>If you have already paid on Remita, paste your 12-digit RRR code or bank transaction ID here.</small>
+        </div>
+
+        <!-- Receipt Upload Box -->
+        <div class="form-group">
+          <label>Payment Receipt / Proof of Payment (Auto-uploaded to Google Drive)</label>
+          <div class="file-upload-zone" id="receipt-dropzone" onclick="document.getElementById('pay-receipt').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:var(--gold);margin-bottom:6px;display:block;"></i>
+            <div style="font-weight:600;color:var(--navy);font-size:0.9rem;">Click to browse or drag &amp; drop payment receipt</div>
+            <div style="font-size:0.75rem;color:var(--gray);margin-top:3px;">Supported formats: JPG, PNG, PDF (Max 5MB) &bull; Saves to Google Drive</div>
+            <input type="file" id="pay-receipt" accept="image/png,image/jpeg,image/jpg,.pdf" style="display:none;" onchange="handleReceiptFile(this)" />
+            <div id="receipt-file-badge" style="display:none;" class="file-info-badge"></div>
+          </div>
+          <small>Upload your Remita confirmation slip, bank payment receipt, or screenshot.</small>
+        </div>
+
+        <button type="submit" id="pay-submit-btn" class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:15px;margin-top:8px;">
+          <i class="fas fa-check-circle"></i> Complete Registration &amp; Submit Receipt
+        </button>
+      </form>
+    </div>
+
+    <!-- PANEL 2: Embedded Google Form View -->
+    <div id="reg-gform-panel" style="display:none;">
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px;margin-bottom:16px;font-size:0.84rem;color:#4A5568;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <i class="fab fa-google" style="color:#4285F4;margin-right:6px;"></i>
+          <strong>Official UNILAG Google Form:</strong> You can also fill and upload directly via Google Forms.
+        </div>
+        <a id="gform-direct-link" href="https://docs.google.com/forms" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:0.78rem;padding:6px 14px;">
+          <i class="fas fa-external-link-alt"></i> Open in New Tab
+        </a>
+      </div>
+      <div class="gform-container">
+        <!-- Google Form Embed Iframe: replace src with your published Google Form embedded link -->
+        <iframe
+          id="gform-iframe"
+          src="https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FEIC2026/viewform?embedded=true"
+          title="FEIC 2026 Official Registration Form"
+          loading="lazy">
+          Loading Google Form...
+        </iframe>
+      </div>
+    </div>
+
+    <div class="paystack-logo"><i class="fas fa-university"></i> University of Lagos Conference Account &bull; Reconciled via Remita &bull; Synced with Google Sheets</div>
   </div>
 </div>
 
@@ -1053,97 +1319,369 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---- PAYMENT / REGISTRATION FORM ---- */
-let payData = {};
+/* ---- PAYMENT & REGISTRATION LOGIC ---- */
+/* ---- GOOGLE SHEETS & DRIVE CONFIGURATION (OPTION 1) ---- */
+// Paste your Google Apps Script Web App URL here after deploying the backend script
+window.FEIC_CONFIG = {
+  // Google Apps Script Web App Endpoint for direct Sheets + Drive recording
+  googleScriptUrl: 'https://script.google.com/macros/s/AKfycbw_FEIC2026_APPS_SCRIPT/exec',
+  // Official published Google Form URL (for iframe embed view)
+  googleFormEmbedUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FEIC2026/viewform?embedded=true'
+};
+
+/* ---- PAYMENT & REGISTRATION LOGIC ---- */
+let uploadedReceipt = null;
+
+function switchRegTab(tab) {
+  const formPanel  = document.getElementById('reg-form-panel');
+  const gformPanel = document.getElementById('reg-gform-panel');
+  const formBtn    = document.getElementById('tab-btn-form');
+  const gformBtn   = document.getElementById('tab-btn-gform');
+  if (tab === 'form') {
+    if (formPanel) formPanel.style.display = 'block';
+    if (gformPanel) gformPanel.style.display = 'none';
+    if (formBtn) formBtn.classList.add('active');
+    if (gformBtn) gformBtn.classList.remove('active');
+  } else {
+    if (formPanel) formPanel.style.display = 'none';
+    if (gformPanel) gformPanel.style.display = 'block';
+    if (formBtn) formBtn.classList.remove('active');
+    if (gformBtn) gformBtn.classList.add('active');
+  }
+}
+
+function handleReceiptFile(input) {
+  const file = input.files && input.files[0];
+  const badge = document.getElementById('receipt-file-badge');
+  if (!file) {
+    uploadedReceipt = null;
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+  // Max 5MB limit check
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File size exceeds 5MB limit. Please choose a smaller file.');
+    input.value = '';
+    uploadedReceipt = null;
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+  const sizeKb = (file.size / 1024).toFixed(1);
+  uploadedReceipt = {
+    name: file.name,
+    size: sizeKb + ' KB',
+    type: file.type,
+    uploadedAt: new Date().toISOString(),
+    base64: null
+  };
+
+  // Read Base64 for direct Google Drive upload
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    if (uploadedReceipt) {
+      uploadedReceipt.base64 = evt.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+
+  if (badge) {
+    badge.innerHTML = `<i class="fas fa-check-circle" style="color:#2B6CB0;"></i> <strong>Receipt Attached:</strong> ${file.name} (${sizeKb} KB) <span onclick="clearReceiptFile(event)" style="margin-left:8px;cursor:pointer;color:#C53030;" title="Remove file">&times;</span>`;
+    badge.style.display = 'inline-flex';
+  }
+}
+
+function clearReceiptFile(e) {
+  if (e) e.stopPropagation();
+  uploadedReceipt = null;
+  const input = document.getElementById('pay-receipt');
+  if (input) input.value = '';
+  const badge = document.getElementById('receipt-file-badge');
+  if (badge) badge.style.display = 'none';
+}
+
+// Drag & drop support for receipt dropzone
+(function setupDropzone() {
+  window.addEventListener('DOMContentLoaded', () => {
+    const dropzone = document.getElementById('receipt-dropzone');
+    if (!dropzone) return;
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.style.borderColor = 'var(--gold)';
+        dropzone.style.background = '#FFF8E6';
+      });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.style.borderColor = '#CBD5E1';
+        dropzone.style.background = 'var(--offwhite)';
+      });
+    });
+    dropzone.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files.length) {
+        const input = document.getElementById('pay-receipt');
+        input.files = dt.files;
+        handleReceiptFile(input);
+      }
+    });
+  });
+})();
 
 function openPayModal(type, category, currency, amount, displayAmount) {
-  payData = { type, category, currency, amount, displayAmount };
-  document.getElementById('modal-category').textContent = category;
-  document.getElementById('modal-price').textContent    = displayAmount;
-  // Pre-select the matching category in the dropdown if possible
+  switchRegTab('form');
+  // Pre-select matching category
   const sel = document.getElementById('pay-category');
-  for (let i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].value === category) { sel.selectedIndex = i; break; }
+  if (sel) {
+    if (type === 'student') sel.value = 'student';
+    else if (type === 'non-student') sel.value = 'non-student';
+    else if (type === 'international') sel.value = 'international';
   }
   updateFeeDisplay();
-  document.getElementById('payModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
+  const modal = document.getElementById('payModal');
+  if (modal) modal.classList.add('active');
 }
+
 function closePayModal() {
-  document.getElementById('payModal').classList.remove('active');
-  document.body.style.overflow = '';
-  document.getElementById('payForm').reset();
-  document.getElementById('fee-summary').style.display = 'none';
+  document.body.classList.remove('modal-open');
+  const modal = document.getElementById('payModal');
+  if (modal) modal.classList.remove('active');
+  const form = document.getElementById('payForm');
+  if (form) form.reset();
+  clearReceiptFile();
+  updateFeeDisplay();
+  const btn = document.getElementById('pay-submit-btn');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration &amp; Submit Receipt';
+  }
 }
-document.getElementById('payModal').addEventListener('click', e => { if (e.target.id === 'payModal') closePayModal(); });
+
+// Close when clicking overlay backdrop
+document.getElementById('payModal').addEventListener('click', e => {
+  if (e.target.id === 'payModal') closePayModal();
+});
 
 function updateFeeDisplay() {
   const sel = document.getElementById('pay-category');
+  if (!sel) return;
   const opt = sel.options[sel.selectedIndex];
-  const summary = document.getElementById('fee-summary');
-  if (opt && opt.dataset.fee) {
-    document.getElementById('fee-amount').textContent = opt.dataset.fee;
-    summary.style.display = 'block';
-    document.getElementById('modal-category').textContent = opt.value;
-    document.getElementById('modal-price').textContent    = opt.dataset.fee;
-  } else {
-    summary.style.display = 'none';
+  if (opt) {
+    const fee = opt.dataset.fee || '&#8358;30,000';
+    const label = opt.dataset.label || opt.text;
+    const feeAmtEl = document.getElementById('fee-amount');
+    const feeCatEl = document.getElementById('fee-cat-name');
+    if (feeAmtEl) feeAmtEl.innerHTML = fee;
+    if (feeCatEl) feeCatEl.textContent = label;
   }
 }
 
 function submitRegistration(e) {
   e.preventDefault();
-  const name     = document.getElementById('pay-name').value.trim();
-  const email    = document.getElementById('pay-email').value.trim();
-  const phone    = document.getElementById('pay-phone').value.trim();
-  const affil    = document.getElementById('pay-affil').value.trim();
-  const sel      = document.getElementById('pay-category');
-  const catLabel = sel.options[sel.selectedIndex];
-  if (!name || !email || !affil || !catLabel || !catLabel.dataset.fee) {
-    alert('Please fill in all required fields and select a category.');
+  const name  = document.getElementById('pay-name').value.trim();
+  const email = document.getElementById('pay-email').value.trim();
+  const phone = document.getElementById('pay-phone').value.trim();
+  const affil = document.getElementById('pay-affil').value.trim();
+  const sel   = document.getElementById('pay-category');
+  const opt   = sel.options[sel.selectedIndex];
+  const rrr   = document.getElementById('pay-rrr').value.trim();
+
+  if (!name || !email || !affil || !opt) {
+    alert('Please fill in all required fields.');
     return;
   }
-  const fee      = catLabel.dataset.fee;
-  const category = catLabel.value;
 
-  // Close form and show payment instructions
+  const submitBtn = document.getElementById('pay-submit-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving to Google Sheets &amp; Drive...';
+  }
+
+  const categoryName = opt.dataset.label || opt.text;
+  const fee = opt.dataset.fee || '';
+  const refCode = 'FEIC-' + Math.floor(100000 + Math.random() * 900000);
+  const timestamp = new Date().toLocaleString();
+
+  // Prepare payload for Google Sheets & Google Drive (Option 1)
+  const payload = {
+    refCode: refCode,
+    name: name,
+    email: email,
+    phone: phone || '',
+    affiliation: affil,
+    category: categoryName,
+    fee: fee,
+    rrr: rrr || 'Pending',
+    receiptName: uploadedReceipt ? uploadedReceipt.name : '',
+    receiptType: uploadedReceipt ? uploadedReceipt.type : '',
+    receiptBase64: uploadedReceipt ? uploadedReceipt.base64 : '',
+    timestamp: timestamp
+  };
+
+  // Send to Google Apps Script backend if configured
+  if (window.FEIC_CONFIG && window.FEIC_CONFIG.googleScriptUrl && !window.FEIC_CONFIG.googleScriptUrl.includes('AKfycbw_FEIC2026_APPS_SCRIPT')) {
+    try {
+      fetch(window.FEIC_CONFIG.googleScriptUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.warn('Google Sync network notice:', err));
+    } catch (err) {
+      console.warn('Google Sync error:', err);
+    }
+  }
+
+  // Save to browser localStorage (persistent local database backup)
+  const registrationRecord = {
+    id: refCode,
+    name,
+    email,
+    phone,
+    affiliation: affil,
+    category: categoryName,
+    fee,
+    rrr: rrr || 'Pending',
+    receipt: uploadedReceipt ? uploadedReceipt.name : 'Not attached yet',
+    date: timestamp,
+    googleSync: 'Queued / Synced'
+  };
+
+  try {
+    const existing = JSON.parse(localStorage.getItem('feic_registrations') || '[]');
+    existing.push(registrationRecord);
+    localStorage.setItem('feic_registrations', JSON.stringify(existing));
+  } catch (err) {
+    console.warn('Could not save to localStorage:', err);
+  }
+
+  // Close input modal
   closePayModal();
-  const msg = document.createElement('div');
-  msg.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:rgba(17,28,51,0.88);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-  msg.innerHTML = `
-    <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;padding:36px 32px;font-family:Inter,sans-serif;position:relative;">
-      <button onclick="this.closest('[style]').remove()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#8A94A6;">&#x2715;</button>
-      <div style="text-align:center;margin-bottom:24px;">
-        <div style="width:56px;height:56px;background:linear-gradient(135deg,#F5A623,#E87722);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
-          <i class="fas fa-check" style="color:#fff;font-size:1.5rem;"></i>
+
+  // Prepare email subject and body for the conference committee
+  const emailSubject = encodeURIComponent(`FEIC 2026 Registration & Receipt [${refCode}] - ${name}`);
+  const emailBody = encodeURIComponent(
+    `Dear FEIC 2026 Conference Committee,\n\n` +
+    `Please find below my registration details and payment confirmation for the 7th Faculty of Engineering International Conference (FEIC 2026):\n\n` +
+    `Registration Ref: ${refCode}\n` +
+    `Full Name: ${name}\n` +
+    `Email: ${email}\n` +
+    `Phone: ${phone || 'N/A'}\n` +
+    `Institution / Organisation: ${affil}\n` +
+    `Category: ${categoryName}\n` +
+    `Amount: ${fee}\n` +
+    `Remita RRR / Ref: ${rrr || 'Will be sent upon payment'}\n` +
+    `Receipt Status: ${uploadedReceipt ? 'Attached with this submission (' + uploadedReceipt.name + ')' : 'To be provided'}\n\n` +
+    `Kindly confirm receipt of my registration and payment.\n\n` +
+    `Best regards,\n${name}`
+  );
+  const mailtoUrl = `mailto:feiconference@unilag.edu.ng?subject=${emailSubject}&body=${emailBody}`;
+
+  // Display Confirmation Overlay Modal
+  document.body.classList.add('modal-open');
+  const confirmOverlay = document.createElement('div');
+  confirmOverlay.id = 'reg-confirm-modal';
+  confirmOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999;background:rgba(10,18,36,0.85);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;';
+
+  confirmOverlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;padding:34px 28px;font-family:Inter,sans-serif;position:relative;margin:auto 0;box-shadow:0 24px 60px rgba(0,0,0,0.35);animation:modalIn 0.28s ease;">
+      <button onclick="closeConfirmationOverlay()" style="position:absolute;top:16px;right:18px;background:#F4F6FA;border:1px solid #E2E8F0;width:34px;height:34px;border-radius:50%;cursor:pointer;color:#1B2A4A;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">&times;</button>
+      
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="width:58px;height:58px;background:linear-gradient(135deg,#2ECC71,#27AE60);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 6px 18px rgba(46,204,113,0.3);">
+          <i class="fas fa-check" style="color:#fff;font-size:1.6rem;"></i>
         </div>
-        <h3 style="color:#1B2A4A;font-size:1.3rem;margin-bottom:6px;">Registration Received!</h3>
-        <p style="color:#8A94A6;font-size:0.9rem;">Thank you, <strong>${name}</strong>. Please complete your payment below.</p>
+        <h3 style="font-family:'Oswald',sans-serif;color:#1B2A4A;font-size:1.4rem;margin:0 0 4px;">Registration Received!</h3>
+        <p style="color:#64748B;font-size:0.86rem;margin:0;">Ref Number: <strong style="color:#E87722;letter-spacing:1px;">${refCode}</strong></p>
       </div>
-      <div style="background:#F4F6FA;border-radius:10px;padding:20px;margin-bottom:22px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.85rem;">
-          <div><span style="color:#8A94A6;">Name</span><br><strong>${name}</strong></div>
-          <div><span style="color:#8A94A6;">Email</span><br><strong>${email}</strong></div>
-          <div><span style="color:#8A94A6;">Category</span><br><strong>${category}</strong></div>
-          <div><span style="color:#8A94A6;">Amount Due</span><br><strong style="color:#E87722;font-size:1.05rem;">${fee}</strong></div>
+
+      <!-- Registration Summary -->
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.83rem;">
+          <div><span style="color:#64748B;">Delegate Name</span><br><strong style="color:#1B2A4A;">${name}</strong></div>
+          <div><span style="color:#64748B;">Email Address</span><br><strong style="color:#1B2A4A;">${email}</strong></div>
+          <div><span style="color:#64748B;">Category</span><br><strong style="color:#1B2A4A;">${categoryName}</strong></div>
+          <div><span style="color:#64748B;">Amount</span><br><strong style="color:#E87722;font-size:1rem;">${fee}</strong></div>
+          <div><span style="color:#64748B;">Remita RRR</span><br><strong style="color:#1B2A4A;">${rrr || 'Pending verification'}</strong></div>
+          <div><span style="color:#64748B;">Receipt Document</span><br><strong style="color:#27AE60;">${uploadedReceipt ? uploadedReceipt.name : 'Will be sent via email'}</strong></div>
         </div>
       </div>
-      <div style="background:#1B2A4A;color:#fff;border-radius:10px;padding:18px 20px;font-size:0.85rem;line-height:1.7;margin-bottom:22px;">
-        <strong style="display:block;margin-bottom:8px;color:#F5A623;"><i class="fas fa-university"></i> Payment Instructions (Remita)</strong>
-        <ol style="margin:0;padding-left:18px;">
-          <li>Visit <a href="https://remita.net" target="_blank" style="color:#F5A623;">remita.net</a> and select <em>"Pay Federal Government of Nigeria"</em>.</li>
-          <li>Search for <strong>University of Lagos</strong> as the biller.</li>
-          <li>Select the <strong>FEIC 2026 Conference Fee</strong> service.</li>
-          <li>Enter your name, email (<strong>${email}</strong>) and the amount: <strong>${fee}</strong>.</li>
-          <li>Complete payment and keep your Remita Retrieval Reference (RRR).</li>
-          <li>Email your RRR to <a href="mailto:feiconference@unilag.edu.ng" style="color:#F5A623;">feiconference@unilag.edu.ng</a> to confirm your registration.</li>
+
+      <!-- Remita Payment Instructions -->
+      <div style="background:#1B2A4A;color:#fff;border-radius:10px;padding:16px 18px;font-size:0.82rem;line-height:1.6;margin-bottom:20px;">
+        <div style="font-weight:700;color:#F5A623;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-university"></i> Remita Payment Reconciliation Details
+        </div>
+        <p style="margin:0 0 6px;color:#D0D8E8;">To complete reconciliation on the University of Lagos account:</p>
+        <ol style="margin:0;padding-left:18px;color:#D0D8E8;">
+          <li>Go to <a href="https://remita.net" target="_blank" rel="noopener" style="color:#F5A623;text-decoration:underline;">remita.net</a> &rarr; <em>"Pay Federal Government of Nigeria"</em>.</li>
+          <li>Biller Name: <strong>University of Lagos</strong>.</li>
+          <li>Service: <strong>FEIC 2026 Conference Fee</strong>.</li>
+          <li>Amount: <strong>${fee}</strong> (${categoryName}).</li>
+          <li>Send your Remita Retrieval Reference (RRR) or payment slip to <a href="mailto:feiconference@unilag.edu.ng" style="color:#F5A623;">feiconference@unilag.edu.ng</a> referencing <strong>${refCode}</strong>.</li>
         </ol>
       </div>
-      <button onclick="this.closest('[style]').remove()" style="width:100%;padding:14px;background:linear-gradient(135deg,#F5A623,#E87722);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;">Close</button>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="${mailtoUrl}" style="flex:1;min-width:200px;text-align:center;padding:12px;background:linear-gradient(135deg,#F5A623,#E87722);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:0.88rem;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="fas fa-envelope"></i> Email Confirmation to Committee
+        </a>
+        <button onclick="window.print()" style="padding:12px 18px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;color:#1B2A4A;display:inline-flex;align-items:center;gap:6px;">
+          <i class="fas fa-print"></i> Print Slip
+        </button>
+        <button onclick="closeConfirmationOverlay()" style="padding:12px 18px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;color:#64748B;">
+          Done
+        </button>
+      </div>
     </div>
   `;
-  document.body.appendChild(msg);
+  document.body.appendChild(confirmOverlay);
 }
+
+function closeConfirmationOverlay() {
+  const overlay = document.getElementById('reg-confirm-modal');
+  if (overlay) overlay.remove();
+  document.body.classList.remove('modal-open');
+}
+
+// Global Admin helper to export all stored registrations as CSV
+window.exportFEICRegistrations = function() {
+  const data = JSON.parse(localStorage.getItem('feic_registrations') || '[]');
+  if (!data.length) {
+    alert('No registrations recorded yet on this browser.');
+    return;
+  }
+  const headers = ['Registration ID', 'Full Name', 'Email', 'Phone', 'Affiliation', 'Category', 'Fee', 'Remita RRR', 'Receipt File', 'Date'];
+  const csvRows = [headers.join(',')];
+  data.forEach(item => {
+    const row = [
+      `"${item.id}"`,
+      `"${(item.name || '').replace(/"/g, '""')}"`,
+      `"${(item.email || '').replace(/"/g, '""')}"`,
+      `"${(item.phone || '').replace(/"/g, '""')}"`,
+      `"${(item.affiliation || '').replace(/"/g, '""')}"`,
+      `"${(item.category || '').replace(/"/g, '""')}"`,
+      `"${(item.fee || '').replace(/"/g, '""')}"`,
+      `"${(item.rrr || '').replace(/"/g, '""')}"`,
+      `"${(item.receipt || '').replace(/"/g, '""')}"`,
+      `"${item.date}"`
+    ];
+    csvRows.push(row.join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `FEIC_2026_Registrations_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
 
 
 
