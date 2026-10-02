@@ -14,9 +14,19 @@ CREATE TABLE IF NOT EXISTS public.registrations (
     phone TEXT,
     affiliation TEXT,
     category TEXT,
+    receipt_path TEXT,
+    fee_amount NUMERIC(12, 2),
+    fee_currency TEXT,
     status TEXT NOT NULL DEFAULT 'registered', -- 'registered' (unpaid) or 'paid'
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Add receipt and fee columns to existing registrations tables as well.
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS affiliation TEXT;
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS receipt_path TEXT;
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS fee_amount NUMERIC(12, 2);
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS fee_currency TEXT;
 
 -- 3. Create Payments Table
 CREATE TABLE IF NOT EXISTS public.payments (

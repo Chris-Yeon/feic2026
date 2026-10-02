@@ -48,9 +48,19 @@ CREATE TABLE IF NOT EXISTS public.registrations (
     phone TEXT,
     affiliation TEXT,
     category TEXT,
+   receipt_path TEXT,
+   fee_amount NUMERIC(12, 2),
+   fee_currency TEXT,
     status TEXT NOT NULL DEFAULT 'registered', -- 'registered' (unpaid) or 'paid'
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Also add these fields if the registrations table already exists
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS affiliation TEXT;
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS receipt_path TEXT;
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS fee_amount NUMERIC(12, 2);
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS fee_currency TEXT;
 
 -- 2. Create Payments Table
 CREATE TABLE IF NOT EXISTS public.payments (
@@ -77,6 +87,12 @@ ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ```
 
+### Step 1.3: Create a private receipt bucket
+1. Open **Storage** in the Supabase dashboard and create a bucket named `receipts`.
+2. Keep the bucket **private**. Do not add public read access or anonymous upload policies; the server uses its secret key for uploads.
+3. Set the allowed MIME types to `image/jpeg`, `image/png`, and `image/webp`, with a 1 MB maximum file size.
+4. Run the updated `schema.sql` in SQL Editor if you already created the registrations table. It adds the receipt storage path and selected fixed fee fields.
+
 ---
 
 ## 2. Environment Variables & Security Rules
@@ -95,7 +111,8 @@ APP_URL=http://localhost:3000
 
 # Supabase Credentials (Supabase Dashboard -> Project Settings -> API)
 SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=your_server_side_secret_key_here
+SUPABASE_RECEIPTS_BUCKET=receipts
 
 # Paystack Credentials (Paystack Dashboard -> Settings -> API Keys & Webhooks)
 PAYSTACK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -118,6 +135,12 @@ PAYSTACK_PUBLIC_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### `POST /api/register`
 - Inserts a new registrant into `public.registrations` with status `'registered'`.
 - Returns `{ success: true, registration: { id, name, email, ... } }`.
+
+### `POST /api/registration-submit`
+- Receives the main conference registration form as `multipart/form-data`, including one JPG, PNG, or WebP receipt image (maximum 1 MB).
+- Uploads the image to the private Supabase Storage bucket and records its private object path, delegate details, and server-selected fee in `public.registrations`.
+- The main page no longer uses Web3Forms for registration or receipt uploads. Configure the backend `.env`, create the private `receipts` bucket, and run the updated schema before testing the form.
+- The stored `receipt_path` is not a public link. Admin viewing/download functionality is not exposed by this public registration endpoint.
 
 ### `POST /api/paystack/init`
 - Receives `registration_id`, `email`, `amount`, and `currency`.

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const path = require('path');
+const multer = require('multer');
 require('dotenv').config();
 
 const { createClient } = require('@supabase/supabase-js');
@@ -32,6 +33,18 @@ const supabase = createClient(
     }
   }
 );
+
+const receiptUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 1024 * 1024, files: 1 },
+  fileFilter: (req, file, callback) => {
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!supportedTypes.includes(file.mimetype)) {
+      return callback(new Error('Receipt must be a JPG, PNG, or WebP image.'));
+    }
+    callback(null, true);
+  }
+});
 
 // ==============================================================================
 // 2. Middlewares
@@ -122,6 +135,101 @@ app.post('/api/register', async (req, res) => {
       message: 'Internal server error.'
     });
   }
+});
+
+/**
+ * POST /api/registration-submit
+ * Receives the registration form and receipt image, stores the image in a private
+ * Supabase Storage bucket, then saves the registration and storage path.
+ */
+app.post('/api/registration-submit', (req, res) => {
+  receiptUpload.single('receipt')(req, res, async uploadError => {
+    if (uploadError) {
+      const statusCode = uploadError instanceof multer.MulterError ? 400 : 400;
+      return res.status(statusCode).json({ success: false, message: uploadError.message });
+    }
+
+    try {
+      if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: 'Registration storage is not configured. Check the server .env settings.'
+        });
+      }
+
+      const { name, email, phone, institution, category } = req.body;
+      const tierFees = {
+        'National Student': { amount: 30000, currency: 'NGN' },
+        'National Non-Student': { amount: 70000, currency: 'NGN' },
+        'International Delegate': { amount: 200, currency: 'USD' }
+      };
+      const selectedFee = tierFees[category];
+
+      if (!name?.trim() || !email?.trim() || !institution?.trim() || !selectedFee || !req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'Name, email, institution, valid category, and receipt image are required.'
+        });
+      }
+
+      const fileExtensions = {
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp'
+      };
+      const receiptPath = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${fileExtensions[req.file.mimetype]}`;
+      const bucketName = process.env.SUPABASE_RECEIPTS_BUCKET || 'receipts';
+
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(receiptPath, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Supabase receipt upload error:', uploadError);
+        return res.status(502).json({
+          success: false,
+          message: 'Could not save the receipt. Confirm the private receipts bucket exists and try again.'
+        });
+      }
+
+      const { data, error: registrationError } = await supabase
+        .from('registrations')
+        .insert([{
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone?.trim() || null,
+          affiliation: institution.trim(),
+          category,
+          status: 'registered',
+          receipt_path: receiptPath,
+          fee_amount: selectedFee.amount,
+          fee_currency: selectedFee.currency
+        }])
+        .select('id, name, email, category, status, receipt_path, fee_amount, fee_currency, created_at')
+        .single();
+
+      if (registrationError) {
+        await supabase.storage.from(bucketName).remove([receiptPath]);
+        console.error('Supabase registration insert error:', registrationError);
+        return res.status(502).json({
+          success: false,
+          message: 'Could not save the registration record. Check that the database schema is updated.'
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Registration and receipt saved successfully.',
+        registration: data
+      });
+    } catch (err) {
+      console.error('Unexpected registration submission error:', err);
+      return res.status(500).json({ success: false, message: 'Server error while saving registration.' });
+    }
+  });
 });
 
 /**

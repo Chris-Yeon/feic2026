@@ -973,16 +973,25 @@
         <div id="fee-amount" style="font-size:1.8rem;font-weight:800;color:var(--gold);"></div>
       </div>
 
+      <div id="national-payment-details" style="background:#FFF8E6;border:2px solid var(--gold);border-radius:10px;padding:15px 18px;margin-bottom:18px;color:var(--navy);font-weight:800;line-height:1.7;">
+        <div>Bank: UBA</div>
+        <div>Account No: 2389921701</div>
+        <div>Account Name: Faculty of Engineering Conference</div>
+      </div>
+      <div id="international-payment-details" style="display:none;background:#FFF8E6;border:2px solid var(--gold);border-radius:10px;padding:15px 18px;margin-bottom:18px;color:var(--navy);font-weight:800;line-height:1.7;">
+        International bank account payment details will be provided soon.
+      </div>
+
       <div class="form-group">
         <label for="pay-receipt">Payment Receipt Image <span style="color:red;">*</span></label>
         <div class="file-upload-zone" id="receipt-dropzone" onclick="document.getElementById('pay-receipt').click()">
           <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:var(--gold);margin-bottom:6px;display:block;"></i>
           <div style="font-weight:600;color:var(--navy);font-size:0.9rem;">Click to browse or drag &amp; drop your receipt image</div>
           <div style="font-size:0.75rem;color:var(--gray);margin-top:3px;">JPG, PNG or WebP · Maximum 1 MB</div>
-          <input type="file" id="pay-receipt" name="attachment" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleReceiptFile(this)" required />
+          <input type="file" id="pay-receipt" name="receipt" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleReceiptFile(this)" required />
           <div id="receipt-file-badge" style="display:none;" class="file-info-badge"></div>
         </div>
-        <small>Receipt image upload through Web3Forms requires a plan that supports attachments.</small>
+        <small>Your receipt image and registration details will be saved to the conference Supabase project.</small>
       </div>
 
       <div id="registration-status" role="status" aria-live="polite" style="display:none;margin:0 0 12px;padding:12px;border-radius:8px;font-size:0.86rem;"></div>
@@ -990,7 +999,7 @@
         <i class="fas fa-check-circle"></i> Submit Registration &amp; Receipt
       </button>
     </form>
-    <div class="registration-note"><i class="fas fa-lock"></i> Registration details and receipt submitted securely via Web3Forms</div>
+    <div class="registration-note"><i class="fas fa-lock"></i> Registration and receipt are sent to the conference registration server.</div>
   </div>
 </div>
 
@@ -1187,9 +1196,7 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---- REGISTRATION & WEB3FORMS ---- */
-// Create an access key at web3forms.com, then replace this placeholder.
-window.FEIC_CONFIG = { web3FormsAccessKey: 'YOUR_WEB3FORMS_ACCESS_KEY' };
+/* ---- REGISTRATION & SUPABASE BACKEND ---- */
 
 const registrationTiers = {
   student: { category: 'National Student', amount: '30000', currency: 'NGN', fee: '₦30,000' },
@@ -1222,7 +1229,7 @@ function handleReceiptFile(input) {
     return;
   }
   if (file.size > 1024 * 1024) {
-    alert('Web3Forms receipt images must be smaller than 1 MB. Please choose a smaller image.');
+    alert('Receipt images must be smaller than 1 MB. Please choose a smaller image.');
     input.value = '';
     if (badge) badge.style.display = 'none';
     return;
@@ -1275,6 +1282,9 @@ function clearReceiptFile() {
 function openPayModal(type) {
   selectedTier = registrationTiers[type];
   if (!selectedTier) return;
+  const isInternational = type === 'international';
+  document.getElementById('national-payment-details').style.display = isInternational ? 'none' : 'block';
+  document.getElementById('international-payment-details').style.display = isInternational ? 'block' : 'none';
   document.getElementById('pay-category').value = selectedTier.category;
   document.getElementById('pay-amount').value = selectedTier.amount;
   document.getElementById('pay-currency').value = selectedTier.currency;
@@ -1316,7 +1326,6 @@ async function submitRegistration(e) {
   const phone = document.getElementById('pay-phone').value.trim();
   const affil = document.getElementById('pay-affil').value.trim();
   const receipt = document.getElementById('pay-receipt').files[0];
-  const accessKey = window.FEIC_CONFIG && window.FEIC_CONFIG.web3FormsAccessKey;
 
   if (!selectedTier) {
     showRegistrationStatus('Please close this form and select a registration option first.', true);
@@ -1326,41 +1335,30 @@ async function submitRegistration(e) {
     showRegistrationStatus('Please complete the required fields and attach your payment receipt image.', true);
     return;
   }
-  if (!accessKey || accessKey === 'YOUR_WEB3FORMS_ACCESS_KEY') {
-    showRegistrationStatus('Registration is not configured yet. The site administrator must add the Web3Forms access key.', true);
-    return;
-  }
-
   const submitBtn = document.getElementById('pay-submit-btn');
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Registration...';
-  const refCode = 'FEIC-' + Math.floor(100000 + Math.random() * 900000);
   try {
     const formData = new FormData(document.getElementById('payForm'));
-    formData.set('access_key', accessKey);
-    formData.set('subject', `FEIC 2026 Registration — ${name} (${refCode})`);
-    formData.set('from_name', 'FEIC 2026 Registration Portal');
-    formData.set('registration_reference', refCode);
     formData.set('category', selectedTier.category);
-    formData.set('amount', selectedTier.fee);
-    formData.set('phone', phone || 'Not provided');
+    formData.set('phone', phone);
     formData.set('institution', affil);
 
-    const response = await fetch('https://api.web3forms.com/submit', {
+    const response = await fetch('/api/registration-submit', {
       method: 'POST',
       body: formData
     });
     const result = await response.json();
     if (!response.ok || !result.success) {
-      throw new Error(result.message || 'The form could not be submitted. Please try again.');
+      throw new Error(result.message || 'Could not save your registration. Please try again.');
     }
 
-    showRegistrationStatus(`Thank you, ${name}. Your registration and receipt were submitted successfully. Reference: ${refCode}.`, false);
+    showRegistrationStatus(`Thank you, ${name}. Your registration and receipt were saved successfully.`, false);
     document.getElementById('payForm').reset();
     clearReceiptFile();
   } catch (err) {
-    console.error('Web3Forms submission failed:', err);
-    showRegistrationStatus(err.message || 'Unable to submit your registration. Please check your connection and try again.', true);
+    console.error('Registration submission failed:', err);
+    showRegistrationStatus(err.message || 'Unable to save your registration. Confirm the server is running and try again.', true);
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Registration &amp; Receipt';
