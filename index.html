@@ -13,9 +13,6 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Paystack -->
-  <script src="https://js.paystack.co/v1/inline.js"></script>
-
   <style>
     :root {
       --navy:       #1B2A4A;
@@ -346,64 +343,7 @@
       max-width: 100%;
       word-break: break-all;
     }
-    .reg-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      border-bottom: 1.5px solid #E2E8F0;
-      padding-bottom: 10px;
-    }
-    .reg-tab-btn {
-      padding: 9px 18px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      border-radius: 8px;
-      border: 1.5px solid transparent;
-      background: transparent;
-      color: #64748B;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      transition: var(--transition);
-    }
-    .reg-tab-btn.active {
-      background: var(--navy);
-      color: var(--white);
-      border-color: var(--navy);
-    }
-    .reg-tab-btn:hover:not(.active) {
-      background: #F1F5F9;
-      color: var(--navy);
-    }
-    .gform-container {
-      width: 100%;
-      min-height: 520px;
-      border-radius: var(--radius);
-      overflow: hidden;
-      border: 1px solid #E2E8F0;
-      background: var(--white);
-    }
-    .gform-container iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
-      display: block;
-    }
-    .google-sync-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      color: #166534;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-    }
-    .paystack-logo { text-align: center; margin-top: 14px; color: var(--gray); font-size: 0.75rem; }
+    .registration-note { text-align: center; margin-top: 14px; color: var(--gray); font-size: 0.75rem; }
 
     /* SUBMISSION */
     #submission { padding: 80px 0; background: var(--offwhite); }
@@ -968,7 +908,7 @@
         <div class="reg-type">National &bull; Student</div>
         <div class="reg-price"><span class="reg-currency">&#8358;</span>30,000</div>
         <div class="reg-desc">Full conference access for Nigerian student delegates</div>
-        <button class="btn btn-primary" onclick="openPayModal('student','National Student','NGN',30000,'&#8358;30,000')">
+        <button class="btn btn-primary" onclick="openPayModal('student')">
           <i class="fas fa-ticket-alt"></i> Register &amp; Pay
         </button>
       </div>
@@ -977,7 +917,7 @@
         <div class="reg-type">National &bull; Non-Student</div>
         <div class="reg-price"><span class="reg-currency">&#8358;</span>70,000</div>
         <div class="reg-desc">Full conference access for Nigerian professional / academic delegates</div>
-        <button class="btn btn-primary" onclick="openPayModal('non-student','National Non-Student','NGN',70000,'&#8358;70,000')">
+        <button class="btn btn-primary" onclick="openPayModal('non-student')">
           <i class="fas fa-ticket-alt"></i> Register &amp; Pay
         </button>
       </div>
@@ -986,7 +926,7 @@
         <div class="reg-type">International Delegate</div>
         <div class="reg-price"><span class="reg-currency">$</span>200</div>
         <div class="reg-desc">Full conference access for international delegates (USD)</div>
-        <button class="btn btn-outline" onclick="openPayModal('international','International Delegate','USD',200,'$200')">
+        <button class="btn btn-outline" onclick="openPayModal('international')">
           <i class="fas fa-ticket-alt"></i> Register &amp; Pay
         </button>
       </div>
@@ -1050,7 +990,7 @@
         <i class="fas fa-check-circle"></i> Submit Registration &amp; Receipt
       </button>
     </form>
-    <div class="paystack-logo"><i class="fas fa-lock"></i> Registration details and receipt submitted securely via Web3Forms</div>
+    <div class="registration-note"><i class="fas fa-lock"></i> Registration details and receipt submitted securely via Web3Forms</div>
   </div>
 </div>
 
@@ -1375,202 +1315,57 @@ async function submitRegistration(e) {
   const email = document.getElementById('pay-email').value.trim();
   const phone = document.getElementById('pay-phone').value.trim();
   const affil = document.getElementById('pay-affil').value.trim();
-  const sel   = document.getElementById('pay-category');
-  const opt   = sel.options[sel.selectedIndex];
-  const rrr   = document.getElementById('pay-rrr').value.trim();
+  const receipt = document.getElementById('pay-receipt').files[0];
+  const accessKey = window.FEIC_CONFIG && window.FEIC_CONFIG.web3FormsAccessKey;
 
-  if (!name || !email || !affil || !opt) {
-    alert('Please fill in all required fields.');
+  if (!selectedTier) {
+    showRegistrationStatus('Please close this form and select a registration option first.', true);
+    return;
+  }
+  if (!name || !email || !affil || !receipt) {
+    showRegistrationStatus('Please complete the required fields and attach your payment receipt image.', true);
+    return;
+  }
+  if (!accessKey || accessKey === 'YOUR_WEB3FORMS_ACCESS_KEY') {
+    showRegistrationStatus('Registration is not configured yet. The site administrator must add the Web3Forms access key.', true);
     return;
   }
 
   const submitBtn = document.getElementById('pay-submit-btn');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving to Google Sheets &amp; Drive...';
-  }
-
-  const categoryName = opt.dataset.label || opt.text;
-  const fee = opt.dataset.fee || '';
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Registration...';
   const refCode = 'FEIC-' + Math.floor(100000 + Math.random() * 900000);
-  const timestamp = new Date().toLocaleString();
-
-  // Prepare payload for Google Sheets & Google Drive (Option 1)
-  const payload = {
-    refCode: refCode,
-    name: name,
-    email: email,
-    phone: phone || '',
-    affiliation: affil,
-    category: categoryName,
-    fee: fee,
-    rrr: rrr || 'Pending',
-    receiptName: uploadedReceipt ? uploadedReceipt.name : '',
-    receiptType: uploadedReceipt ? uploadedReceipt.type : '',
-    receiptBase64: uploadedReceipt ? uploadedReceipt.base64 : '',
-    timestamp: timestamp
-  };
-
-  // Send to Google Apps Script backend if configured
-  if (window.FEIC_CONFIG && window.FEIC_CONFIG.googleScriptUrl && !window.FEIC_CONFIG.googleScriptUrl.includes('AKfycbw_FEIC2026_APPS_SCRIPT')) {
-    try {
-      fetch(window.FEIC_CONFIG.googleScriptUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(err => console.warn('Google Sync network notice:', err));
-    } catch (err) {
-      console.warn('Google Sync error:', err);
-    }
-  }
-
-  // Save to browser localStorage (persistent local database backup)
-  const registrationRecord = {
-    id: refCode,
-    name,
-    email,
-    phone,
-    affiliation: affil,
-    category: categoryName,
-    fee,
-    rrr: rrr || 'Pending',
-    receipt: uploadedReceipt ? uploadedReceipt.name : 'Not attached yet',
-    date: timestamp,
-    googleSync: 'Queued / Synced'
-  };
-
   try {
-    const existing = JSON.parse(localStorage.getItem('feic_registrations') || '[]');
-    existing.push(registrationRecord);
-    localStorage.setItem('feic_registrations', JSON.stringify(existing));
+    const formData = new FormData(document.getElementById('payForm'));
+    formData.set('access_key', accessKey);
+    formData.set('subject', `FEIC 2026 Registration — ${name} (${refCode})`);
+    formData.set('from_name', 'FEIC 2026 Registration Portal');
+    formData.set('registration_reference', refCode);
+    formData.set('category', selectedTier.category);
+    formData.set('amount', selectedTier.fee);
+    formData.set('phone', phone || 'Not provided');
+    formData.set('institution', affil);
+
+    const response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'The form could not be submitted. Please try again.');
+    }
+
+    showRegistrationStatus(`Thank you, ${name}. Your registration and receipt were submitted successfully. Reference: ${refCode}.`, false);
+    document.getElementById('payForm').reset();
+    clearReceiptFile();
   } catch (err) {
-    console.warn('Could not save to localStorage:', err);
+    console.error('Web3Forms submission failed:', err);
+    showRegistrationStatus(err.message || 'Unable to submit your registration. Please check your connection and try again.', true);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Registration &amp; Receipt';
   }
-
-  // Close input modal
-  closePayModal();
-
-  // Prepare email subject and body for the conference committee
-  const emailSubject = encodeURIComponent(`FEIC 2026 Registration & Receipt [${refCode}] - ${name}`);
-  const emailBody = encodeURIComponent(
-    `Dear FEIC 2026 Conference Committee,\n\n` +
-    `Please find below my registration details and payment confirmation for the 7th Faculty of Engineering International Conference (FEIC 2026):\n\n` +
-    `Registration Ref: ${refCode}\n` +
-    `Full Name: ${name}\n` +
-    `Email: ${email}\n` +
-    `Phone: ${phone || 'N/A'}\n` +
-    `Institution / Organisation: ${affil}\n` +
-    `Category: ${categoryName}\n` +
-    `Amount: ${fee}\n` +
-    `Remita RRR / Ref: ${rrr || 'Will be sent upon payment'}\n` +
-    `Receipt Status: ${uploadedReceipt ? 'Attached with this submission (' + uploadedReceipt.name + ')' : 'To be provided'}\n\n` +
-    `Kindly confirm receipt of my registration and payment.\n\n` +
-    `Best regards,\n${name}`
-  );
-  const mailtoUrl = `mailto:feiconference@unilag.edu.ng?subject=${emailSubject}&body=${emailBody}`;
-
-  // Display Confirmation Overlay Modal
-  document.body.classList.add('modal-open');
-  const confirmOverlay = document.createElement('div');
-  confirmOverlay.id = 'reg-confirm-modal';
-  confirmOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999;background:rgba(10,18,36,0.85);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;';
-
-  confirmOverlay.innerHTML = `
-    <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;padding:34px 28px;font-family:Inter,sans-serif;position:relative;margin:auto 0;box-shadow:0 24px 60px rgba(0,0,0,0.35);animation:modalIn 0.28s ease;">
-      <button onclick="closeConfirmationOverlay()" style="position:absolute;top:16px;right:18px;background:#F4F6FA;border:1px solid #E2E8F0;width:34px;height:34px;border-radius:50%;cursor:pointer;color:#1B2A4A;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">&times;</button>
-      
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="width:58px;height:58px;background:linear-gradient(135deg,#2ECC71,#27AE60);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 6px 18px rgba(46,204,113,0.3);">
-          <i class="fas fa-check" style="color:#fff;font-size:1.6rem;"></i>
-        </div>
-        <h3 style="font-family:'Oswald',sans-serif;color:#1B2A4A;font-size:1.4rem;margin:0 0 4px;">Registration Received!</h3>
-        <p style="color:#64748B;font-size:0.86rem;margin:0;">Ref Number: <strong style="color:#E87722;letter-spacing:1px;">${refCode}</strong></p>
-      </div>
-
-      <!-- Registration Summary -->
-      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.83rem;">
-          <div><span style="color:#64748B;">Delegate Name</span><br><strong style="color:#1B2A4A;">${name}</strong></div>
-          <div><span style="color:#64748B;">Email Address</span><br><strong style="color:#1B2A4A;">${email}</strong></div>
-          <div><span style="color:#64748B;">Category</span><br><strong style="color:#1B2A4A;">${categoryName}</strong></div>
-          <div><span style="color:#64748B;">Amount</span><br><strong style="color:#E87722;font-size:1rem;">${fee}</strong></div>
-          <div><span style="color:#64748B;">Remita RRR</span><br><strong style="color:#1B2A4A;">${rrr || 'Pending verification'}</strong></div>
-          <div><span style="color:#64748B;">Receipt Document</span><br><strong style="color:#27AE60;">${uploadedReceipt ? uploadedReceipt.name : 'Will be sent via email'}</strong></div>
-        </div>
-      </div>
-
-      <!-- Remita Payment Instructions -->
-      <div style="background:#1B2A4A;color:#fff;border-radius:10px;padding:16px 18px;font-size:0.82rem;line-height:1.6;margin-bottom:20px;">
-        <div style="font-weight:700;color:#F5A623;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-          <i class="fas fa-university"></i> Remita Payment Reconciliation Details
-        </div>
-        <p style="margin:0 0 6px;color:#D0D8E8;">To complete reconciliation on the University of Lagos account:</p>
-        <ol style="margin:0;padding-left:18px;color:#D0D8E8;">
-          <li>Go to <a href="https://remita.net" target="_blank" rel="noopener" style="color:#F5A623;text-decoration:underline;">remita.net</a> &rarr; <em>"Pay Federal Government of Nigeria"</em>.</li>
-          <li>Biller Name: <strong>University of Lagos</strong>.</li>
-          <li>Service: <strong>FEIC 2026 Conference Fee</strong>.</li>
-          <li>Amount: <strong>${fee}</strong> (${categoryName}).</li>
-          <li>Send your Remita Retrieval Reference (RRR) or payment slip to <a href="mailto:feiconference@unilag.edu.ng" style="color:#F5A623;">feiconference@unilag.edu.ng</a> referencing <strong>${refCode}</strong>.</li>
-        </ol>
-      </div>
-
-      <!-- Actions -->
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <a href="${mailtoUrl}" style="flex:1;min-width:200px;text-align:center;padding:12px;background:linear-gradient(135deg,#F5A623,#E87722);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:0.88rem;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
-          <i class="fas fa-envelope"></i> Email Confirmation to Committee
-        </a>
-        <button onclick="window.print()" style="padding:12px 18px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;color:#1B2A4A;display:inline-flex;align-items:center;gap:6px;">
-          <i class="fas fa-print"></i> Print Slip
-        </button>
-        <button onclick="closeConfirmationOverlay()" style="padding:12px 18px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;color:#64748B;">
-          Done
-        </button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(confirmOverlay);
 }
-
-function closeConfirmationOverlay() {
-  const overlay = document.getElementById('reg-confirm-modal');
-  if (overlay) overlay.remove();
-  document.body.classList.remove('modal-open');
-}
-
-// Global Admin helper to export all stored registrations as CSV
-window.exportFEICRegistrations = function() {
-  const data = JSON.parse(localStorage.getItem('feic_registrations') || '[]');
-  if (!data.length) {
-    alert('No registrations recorded yet on this browser.');
-    return;
-  }
-  const headers = ['Registration ID', 'Full Name', 'Email', 'Phone', 'Affiliation', 'Category', 'Fee', 'Remita RRR', 'Receipt File', 'Date'];
-  const csvRows = [headers.join(',')];
-  data.forEach(item => {
-    const row = [
-      `"${item.id}"`,
-      `"${(item.name || '').replace(/"/g, '""')}"`,
-      `"${(item.email || '').replace(/"/g, '""')}"`,
-      `"${(item.phone || '').replace(/"/g, '""')}"`,
-      `"${(item.affiliation || '').replace(/"/g, '""')}"`,
-      `"${(item.category || '').replace(/"/g, '""')}"`,
-      `"${(item.fee || '').replace(/"/g, '""')}"`,
-      `"${(item.rrr || '').replace(/"/g, '""')}"`,
-      `"${(item.receipt || '').replace(/"/g, '""')}"`,
-      `"${item.date}"`
-    ];
-    csvRows.push(row.join(','));
-  });
-  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `FEIC_2026_Registrations_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
 
 
 
